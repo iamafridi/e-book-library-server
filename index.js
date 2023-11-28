@@ -30,6 +30,7 @@ async function run() {
 
     // Find Operation
     const serviceCollection = client.db("eLibrary").collection("services");
+    const bookingCollection = client.db("eLibrary").collection("bookings");
 
     // Loading Services
     app.get("/services", async (req, res) => {
@@ -37,6 +38,15 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+
+    // Booking Api Here
+app.post("/bookings",async(req,res)=>{
+    const booking = req.body;
+    console.log(booking);
+    const result = await bookingCollection.insertOne(booking);
+    res.send(result);
+})
 
     // Loading one data API CREATION
     app.get("/services/:id", async (req, res) => {
@@ -54,7 +64,7 @@ async function run() {
         },
       };
 
-      const result = await serviceCollection.findOne(query,options);
+      const result = await serviceCollection.findOne(query, options);
       res.send(result);
     });
 
