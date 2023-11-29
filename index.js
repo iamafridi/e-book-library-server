@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -6,7 +7,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middle Wire
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // MongoDB Starts Here
@@ -31,6 +37,30 @@ async function run() {
     // Find Operation
     const serviceCollection = client.db("eLibrary").collection("services");
     const bookingCollection = client.db("eLibrary").collection("bookings");
+
+    // Auth related api
+
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log("USER FOR TOKEN", user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        })
+        .send({ success: true });
+    });
+
+    // logout api
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log('logging out',user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
 
     // Loading Services
     app.get("/services", async (req, res) => {
@@ -58,21 +88,20 @@ async function run() {
       res.send(result);
     });
 
-// Updating 
-app.patch('/bookings/:id',async(req,res)=>{
-    const id = req.params.id;
-    const filter = {_id: new ObjectId(id)};
-    const updateBooking = req.body;
-    console.log(updateBooking);
-    const updateDoc ={
-        $set:{
-            status: updateBooking.status
+    // Updating
+    app.patch("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateBooking = req.body;
+      console.log(updateBooking);
+      const updateDoc = {
+        $set: {
+          status: updateBooking.status,
         },
-    };
-    const result = await bookingCollection.updateOne(filter,updateDoc);
-    res.send(result);
-})
-
+      };
+      const result = await bookingCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     // Delete
     app.delete("/bookings/:id", async (req, res) => {
