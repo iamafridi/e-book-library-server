@@ -62,6 +62,7 @@ async function run() {
     // Find Operation
     const serviceCollection = client.db("eLibrary").collection("services");
     const bookingCollection = client.db("eLibrary").collection("bookings");
+    const latestBookCollection = client.db("eLibrary").collection("latestbook");
 
     // Auth related api
 
@@ -93,6 +94,14 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+// Latest Book Here
+app.get('/latestbook',async(req,res)=>{
+    const cursor = latestBookCollection.find();
+    const result = await cursor.toArray();
+    res.send(result)
+})
+
 
     // Booking Api Here
 
