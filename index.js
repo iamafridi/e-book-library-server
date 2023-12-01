@@ -63,6 +63,21 @@ async function run() {
     const serviceCollection = client.db("eLibrary").collection("services");
     const bookingCollection = client.db("eLibrary").collection("bookings");
     const latestBookCollection = client.db("eLibrary").collection("latestbook");
+    const booksCollection = client.db("eLibrary").collection("books");
+    // Adding Books
+    app.post("/books", async (req, res) => {
+      const newBooks = req.body;
+      console.log(newBooks);
+      const result = await booksCollection.insertOne(newBooks);
+      res.send(result);
+    });
+
+    // reading Books api
+    app.get("/books", async (req, res) => {
+      const cursor = booksCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Auth related api
 
@@ -95,22 +110,21 @@ async function run() {
       res.send(result);
     });
 
-// Latest Book Here
-app.get('/latestbook',async(req,res)=>{
-    const cursor = latestBookCollection.find();
-    const result = await cursor.toArray();
-    res.send(result)
-})
-
+    // Latest Book Here
+    app.get("/latestbook", async (req, res) => {
+      const cursor = latestBookCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Booking Api Here
 
     app.get("/bookings", logger, verifyToken, async (req, res) => {
       console.log(req.query.email);
       console.log("Token Owner Info", req.user);
-    //   if (req.user.email !== req.query.email) {
-    //     return res.status(403).send({ message: "forbidden Access" });
-    //   }
+      //   if (req.user.email !== req.query.email) {
+      //     return res.status(403).send({ message: "forbidden Access" });
+      //   }
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
