@@ -10,7 +10,11 @@ const port = process.env.PORT || 5000;
 // Middle Wire
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://e-book-library-ba9da.web.app",
+      "https://e-book-library-ba9da.firebaseapp.com"
+    ],
     credentials: true,
   })
 );
@@ -57,7 +61,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // Find Operation
     const serviceCollection = client.db("eLibrary").collection("services");
@@ -100,7 +104,8 @@ async function run() {
     app.post("/logout", async (req, res) => {
       const user = req.body;
       console.log("logging out", user);
-      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+      res.clearCookie("token", { maxAge: 0 ,secure: true,
+        sameSite: "none"}).send({ success: true });
     });
 
     // Loading Services
@@ -184,10 +189,10 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
